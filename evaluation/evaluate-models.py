@@ -1,9 +1,10 @@
+import argparse
+import numpy as np
 import pytcga
 import pandas as pd
 from sklearn.linear_model import RidgeCV
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.cross_validation import cross_val_score
-import numpy as np
 
 
 def load_purity_data(path='data/tcga-purity-measures.csv'):
@@ -45,13 +46,22 @@ def build_matrix(data, purity, target_variable='Consensus'):
 
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='Evaluate machine learning methods for tumor purity prediction')
+
+    parser.add_argument('--cancer-codes', nargs='+', default=['LUAD'])
+    parser.add_argument('--target-variable', default='Consensus', help='Purity target variable to predict.')
+    parser.add_argument('--num_splits', default=5, type=int)
+
+    args = parser.parse_args()
+
     models = [RidgeCV(), RandomForestRegressor(n_estimators=50), ]
-    num_splits = 5
+    num_splits = args.num_splits
 
     purity = load_purity_data()
-    cancer_codes = ['blca', 'luad']
+    cancer_codes = args.cancer_codes
 
-    target_variable = 'Consensus'
+    target_variable = args.target_variable
     X, y = build_matrix(load_rnaseq(cancer_codes),
                         purity,
                         target_variable=target_variable)
